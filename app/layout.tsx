@@ -11,8 +11,9 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: "Mental Health Wellness Analyser",
-  description: "AI-powered mental health platform integrating Indian Knowledge Systems",
+  description: "AI-powered mental health platform integrating Indian Knowledge Systems",,
   // generator field removed to avoid exposing template/tooling traces
+    generator: 'v0.app'
 }
 
 export default function RootLayout({

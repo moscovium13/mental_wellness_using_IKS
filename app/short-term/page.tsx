@@ -391,9 +391,14 @@ export default function ShortTermPage() {
                 </Tabs>
 
                 <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-100">
-                  <Button variant="outline" size="sm">
-                    <Play className="w-4 h-4 mr-2" />
-                    Start Practice
+                  <Button 
+                    onClick={() => router.push(`/practice-guide?id=${remedy.id}`)}
+                    variant="outline" 
+                    size="sm"
+                    className="flex items-center space-x-2"
+                  >
+                    <Play className="w-4 h-4" />
+                    <span>Start Practice</span>
                   </Button>
 
                   {!completedRemedies.includes(remedy.id) ? (
