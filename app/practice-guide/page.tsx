@@ -32,7 +32,7 @@ const remedyMap: Record<
       "Repeat for 5-10 cycles",
     ],
     category: "breathing",
-    videoPlaceholder: "https://www.youtube.com/embed/YOUR_VIDEO_ID_HERE",
+    videoPlaceholder: "https://youtu.be/tEmt1Znux58?si=DJ_e2biDbb_BBuB6",
   },
   "body-scan": {
     title: "Progressive Body Scan",
@@ -47,7 +47,7 @@ const remedyMap: Record<
       "End at the crown of your head",
     ],
     category: "meditation",
-    videoPlaceholder: "https://www.youtube.com/embed/YOUR_VIDEO_ID_HERE",
+    videoPlaceholder: "https://youtu.be/oMN0x4s2wL0?si=YWM0cYNmXIB35QOT",
   },
   "child-pose": {
     title: "Balasana (Child's Pose)",
@@ -62,7 +62,7 @@ const remedyMap: Record<
       "Breathe deeply and hold",
     ],
     category: "yoga",
-    videoPlaceholder: "https://www.youtube.com/embed/YOUR_VIDEO_ID_HERE",
+    videoPlaceholder: "https://youtu.be/kH12QrSGedM?si=Upnkb7j6QcUvDyhl",
   },
   "chamomile-tea": {
     title: "Chamomile Tea Ritual",
