@@ -32,7 +32,7 @@ const remedyMap: Record<
       "Repeat for 5-10 cycles",
     ],
     category: "breathing",
-    videoPlaceholder: "https://youtu.be/tEmt1Znux58?si=DJ_e2biDbb_BBuB6",
+    videoPlaceholder: "https://www.youtube.com/embed/temt1Znux58",
   },
   "body-scan": {
     title: "Progressive Body Scan",
