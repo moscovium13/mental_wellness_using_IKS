@@ -4,6 +4,7 @@ export interface TrendInsight {
   dominantState: "stress" | "anxiety" | "depression" | "normal"
   dominantDosha: "Vata" | "Pitta" | "Kapha"
   message: string
+  alert?: string
 }
 
 /**
@@ -37,11 +38,35 @@ export function getTrendInsights(): TrendInsight {
   // Generate contextual message
   const message = generateMessage(dominantState, dominantDosha, stateFrequency)
 
+  // Detect recurring patterns (state appears 3+ times in last 7 entries)
+  const alert = detectRecurringPattern(dominantState, stateFrequency)
+
   return {
     dominantState,
     dominantDosha,
     message,
+    alert,
   }
+}
+
+/**
+ * Detect recurring patterns - returns alert if state appears 3+ times
+ */
+function detectRecurringPattern(state: string, stateFrequency: Record<string, number>): string | undefined {
+  const count = stateFrequency[state] || 0
+
+  if (count < 3) {
+    return undefined
+  }
+
+  const alertMessages: Record<string, string> = {
+    stress: "Moderate recurring stress detected. Consider lifestyle adjustments.",
+    anxiety: "Moderate recurring anxiety detected. Consider lifestyle adjustments.",
+    depression: "Moderate recurring depression detected. Consider lifestyle adjustments.",
+    normal: undefined,
+  }
+
+  return alertMessages[state] as string | undefined
 }
 
 /**
