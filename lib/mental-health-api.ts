@@ -1,5 +1,6 @@
 // API layer for mental health classification and recommendations
 import { aiClassifier, type ClassificationResult } from "./ai-classification"
+import { saveMoodEntry } from "./mood-history"
 
 export interface UserProfile {
   name: string
@@ -46,6 +47,15 @@ export async function analyzeUserInput(request: AnalysisRequest): Promise<Analys
 
   // Determine if follow-up is recommended
   const followUpRecommended = shouldRecommendFollowUp(classification, request.context)
+
+  // Save mood entry to history (with default state if enhanced result not available)
+  try {
+    const state = (classification as any).state || "normal"
+    const dosha = (classification as any).iks_mapping?.dosha || "Vata"
+    saveMoodEntry(state, dosha)
+  } catch (error) {
+    console.log("[v0] Could not save mood history:", error)
+  }
 
   return {
     classification,
