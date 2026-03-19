@@ -419,6 +419,30 @@ export default function ShortTermPage() {
           </Card>
         )}
 
+        {/* Dosha-Specific Recommendations */}
+        {aiAnalysis?.iks_recommendations && (
+          <Card className="mb-8 border-0 shadow-lg bg-gradient-to-br from-purple-50 to-indigo-50">
+            <CardHeader className="pb-3">
+              <div className="flex items-center space-x-2">
+                <Leaf className="w-5 h-5 text-purple-600" />
+                <CardTitle className="text-lg text-purple-900">
+                  {aiAnalysis.iks_recommendations.dosha} Balancing Practices
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2">
+                {aiAnalysis.iks_recommendations.recommendations.map((rec, idx) => (
+                  <li key={idx} className="flex items-start space-x-3">
+                    <span className="text-purple-600 font-bold mt-0.5">•</span>
+                    <span className="text-sm text-purple-800">{rec}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Recommendations */}
         <div className="grid gap-6">
           {recommendedRemedies.map((remedy, index) => (
