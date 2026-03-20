@@ -1,5 +1,6 @@
 // API layer for mental health classification and recommendations
 import { aiClassifier, type ClassificationResult } from "./ai-classification"
+import { saveMoodEntry } from "./mood-history"
 
 export interface UserProfile {
   name: string
@@ -17,12 +18,18 @@ export interface AnalysisRequest {
   context?: "initial" | "follow-up" | "crisis"
 }
 
+export interface DoshaRecommendation {
+  dosha: "Vata" | "Pitta" | "Kapha"
+  recommendations: string[]
+}
+
 export interface AnalysisResponse {
   classification: ClassificationResult
   culturalMessage: string
   nextSteps: string[]
   estimatedTimeToRelief: string
   followUpRecommended: boolean
+  iks_recommendations?: DoshaRecommendation
 }
 
 /**
@@ -47,12 +54,59 @@ export async function analyzeUserInput(request: AnalysisRequest): Promise<Analys
   // Determine if follow-up is recommended
   const followUpRecommended = shouldRecommendFollowUp(classification, request.context)
 
+  // Get dosha-specific recommendations
+  const dosha = (classification as any).iks_mapping?.dosha || "Vata"
+  const iks_recommendations = getDoshaRecommendations(dosha)
+
+  // Save mood entry to history (with default state if enhanced result not available)
+  try {
+    const state = (classification as any).state || "normal"
+    saveMoodEntry(state, dosha)
+  } catch (error) {
+    console.log("[v0] Could not save mood history:", error)
+  }
+
   return {
     classification,
     culturalMessage,
     nextSteps,
     estimatedTimeToRelief,
     followUpRecommended,
+    iks_recommendations,
+  }
+}
+
+/**
+ * Generates dosha-specific recommendations based on imbalance
+ */
+function getDoshaRecommendations(dosha: string): DoshaRecommendation {
+  const doshaRecommendationsMap: Record<string, string[]> = {
+    Vata: [
+      "Practice Anulom Vilom (Alternate Nostril Breathing) for grounding",
+      "Consume warm, nourishing foods (soups, stews, cooked grains)",
+      "Establish a consistent daily routine with fixed meal times",
+      "Use sesame oil massage (Abhyanga) for calming effect",
+      "Keep warm - avoid cold foods and environments",
+    ],
+    Pitta: [
+      "Practice cooling breathing techniques (Shitali, Sitkari Pranayama)",
+      "Reduce screen time and exposure to intense stimuli",
+      "Consume cooling foods (coconut, cucumber, leafy greens)",
+      "Practice restorative yoga rather than intense exercises",
+      "Spend time in nature and avoid excessive heat",
+    ],
+    Kapha: [
+      "Engage in regular physical activity and dynamic exercises",
+      "Practice energizing breathing (Bhastrika Pranayama)",
+      "Include warming spices in diet (ginger, turmeric, black pepper)",
+      "Establish an active morning routine with sunlight exposure",
+      "Try stimulating practices like cold water therapy",
+    ],
+  }
+
+  return {
+    dosha: dosha as "Vata" | "Pitta" | "Kapha",
+    recommendations: doshaRecommendationsMap[dosha] || doshaRecommendationsMap.Vata,
   }
 }
 

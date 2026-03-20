@@ -31,6 +31,38 @@ export interface ClassificationResult {
   confidence: number
 }
 
+// Enhanced classification result with detailed structure
+export interface EnhancedClassificationResult extends ClassificationResult {
+  state: "stress" | "anxiety" | "depression" | "normal"
+  severity: "low" | "medium" | "high"
+  causes: string[]
+  symptoms: string[]
+  short_term_solutions: IKSRecommendation[]
+  long_term_recommendations: IKSRecommendation[]
+  iks_mapping: {
+    dosha: "Vata" | "Pitta" | "Kapha"
+    explanation: string
+  }
+}
+
+// Keyword scoring system for detailed analysis
+interface KeywordScore {
+  category: string
+  score: number
+  matches: string[]
+}
+
+// Dosha mapping rules
+const DOSHA_MAPPING: Record<string, "Vata" | "Pitta" | "Kapha"> = {
+  anxiety: "Vata",
+  stress: "Pitta",
+  depression: "Kapha",
+  sleep: "Vata",
+  physical: "Pitta",
+  cognitive: "Vata",
+  social: "Kapha",
+}
+
 // Comprehensive symptom keyword mapping
 const SYMPTOM_KEYWORDS = {
   anxiety: [
@@ -320,7 +352,99 @@ const IKS_RECOMMENDATIONS: IKSRecommendation[] = [
   },
 ]
 
+// Enhanced keyword scoring categories
+const ENHANCED_KEYWORDS = {
+  anxiety: ["overthinking", "restless", "worried", "panic", "nervous", "anxious", "dread", "fear"],
+  stress: ["pressure", "workload", "overwhelmed", "burned out", "stressed", "overloaded", "burden"],
+  depression: ["low energy", "tired", "no energy", "sad", "hopeless", "empty", "worthless", "dark"],
+}
+
 export class AIClassificationEngine {
+  /**
+   * Keyword-based scoring system for detailed analysis
+   */
+  private scoreKeywords(text: string): KeywordScore[] {
+    const lowerText = text.toLowerCase()
+    const scores: KeywordScore[] = []
+
+    Object.entries(ENHANCED_KEYWORDS).forEach(([category, keywords]) => {
+      const matches = keywords.filter((keyword) => lowerText.includes(keyword))
+      if (matches.length > 0) {
+        scores.push({
+          category,
+          score: matches.length,
+          matches,
+        })
+      }
+    })
+
+    return scores.sort((a, b) => b.score - a.score)
+  }
+
+  /**
+   * Determines primary mental state based on keyword scoring
+   */
+  private determineMentalState(keywordScores: KeywordScore[]): "stress" | "anxiety" | "depression" | "normal" {
+    if (keywordScores.length === 0) return "normal"
+    return (keywordScores[0].category as "stress" | "anxiety" | "depression") || "normal"
+  }
+
+  /**
+   * Maps mental state to Ayurvedic dosha
+   */
+  private mapToDosha(state: string): { dosha: "Vata" | "Pitta" | "Kapha"; explanation: string } {
+    const doshaMap: Record<string, { dosha: "Vata" | "Pitta" | "Kapha"; explanation: string }> = {
+      anxiety: {
+        dosha: "Vata",
+        explanation:
+          "Anxiety is associated with excess Vata (air element). Balancing practices include grounding activities, warm oil massage, and calming breathing techniques.",
+      },
+      stress: {
+        dosha: "Pitta",
+        explanation:
+          "Stress is linked to elevated Pitta (fire element). Cooling practices like meditation, soothing herbs, and rest help restore balance.",
+      },
+      depression: {
+        dosha: "Kapha",
+        explanation:
+          "Depression relates to increased Kapha (earth & water elements). Warming, stimulating practices and gentle exercise help lift energy.",
+      },
+      normal: {
+        dosha: "Vata",
+        explanation: "Maintaining balanced mental state through daily wellness practices.",
+      },
+    }
+
+    return doshaMap[state] || doshaMap.normal
+  }
+
+  /**
+   * Extracts potential causes from user input
+   */
+  private extractCauses(text: string): string[] {
+    const causes: string[] = []
+    const commonCauses = [
+      "work",
+      "family",
+      "relationship",
+      "money",
+      "health",
+      "school",
+      "change",
+      "loss",
+      "uncertainty",
+      "conflict",
+    ]
+
+    commonCauses.forEach((cause) => {
+      if (text.toLowerCase().includes(cause)) {
+        causes.push(cause)
+      }
+    })
+
+    return causes.length > 0 ? causes : ["unspecified"]
+  }
+
   /**
    * Analyzes user input text to extract symptoms and emotional indicators
    */
@@ -538,6 +662,54 @@ export class AIClassificationEngine {
       recommendations,
       professionalHelpNeeded,
       confidence: analysis.confidence,
+    }
+  }
+
+  /**
+   * Enhanced classification with detailed structured output
+   */
+  classifyEnhanced(
+    text: string,
+    duration?: string,
+    userProfile?: { age?: number; experience?: string },
+  ): EnhancedClassificationResult {
+    // Get base classification
+    const baseResult = this.classifyAndRecommend(text, duration, userProfile)
+
+    // Perform keyword-based scoring
+    const keywordScores = this.scoreKeywords(text)
+
+    // Determine mental state
+    const mentalState = this.determineMentalState(keywordScores)
+
+    // Map to dosha
+    const iksMapping = this.mapToDosha(mentalState)
+
+    // Extract causes
+    const causes = this.extractCauses(text)
+
+    // Split recommendations into short-term and long-term
+    const shortTermSolutions = this.recommendIKSPractices(
+      ["anxiety", "stress"],
+      baseResult.severity === "crisis" ? "severe" : baseResult.severity,
+      userProfile,
+    ).slice(0, 3)
+
+    const longTermRecommendations = this.recommendIKSPractices(
+      baseResult.primaryConcerns,
+      baseResult.severity === "crisis" ? "severe" : baseResult.severity,
+      userProfile,
+    )
+
+    return {
+      ...baseResult,
+      state: mentalState,
+      severity: baseResult.severity === "crisis" ? "high" : (baseResult.severity as "low" | "medium" | "high"),
+      causes,
+      symptoms: baseResult.primaryConcerns,
+      short_term_solutions: shortTermSolutions,
+      long_term_recommendations: longTermRecommendations,
+      iks_mapping: iksMapping,
     }
   }
 

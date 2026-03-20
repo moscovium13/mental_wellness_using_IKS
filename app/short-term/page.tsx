@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -19,9 +19,14 @@ import {
   Play,
   RotateCcw,
   CheckCircle,
+  AlertCircle,
+  TrendingUp,
+  Leaf,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { analyzeUserInput, validateUserInput, type AnalysisResponse } from "@/lib/mental-health-api"
+import { getTrendInsights, type TrendInsight } from "@/lib/getTrendInsights"
+import { getMoodHistory } from "@/lib/mood-history"
 
 interface Remedy {
   id: string
@@ -130,6 +135,24 @@ export default function ShortTermPage() {
   const [showRecommendations, setShowRecommendations] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [validationError, setValidationError] = useState<string>("")
+  const [trendInsight, setTrendInsight] = useState<TrendInsight | null>(null)
+  const [recurringPattern, setRecurringPattern] = useState(false)
+
+  // Load trend insights on component mount
+  useEffect(() => {
+    const insight = getTrendInsights()
+    setTrendInsight(insight)
+
+    // Check for recurring patterns (same state 3+ times in last 7 entries)
+    const history = getMoodHistory()
+    const last7 = history.slice(-7)
+    const stateFrequency: Record<string, number> = {}
+    last7.forEach((entry) => {
+      stateFrequency[entry.state] = (stateFrequency[entry.state] || 0) + 1
+    })
+    const hasRecurring = Object.values(stateFrequency).some((count) => count >= 3)
+    setRecurringPattern(hasRecurring)
+  }, [])
 
   const analyzeInput = async () => {
     if (!userInput.trim()) return
@@ -334,6 +357,92 @@ export default function ShortTermPage() {
           </Card>
         )}
 
+        {/* IKS Insight Section */}
+        {aiAnalysis && (aiAnalysis.classification as any).iks_mapping && (
+          <Card className="mb-8 border-0 shadow-lg bg-gradient-to-br from-amber-50 to-orange-50">
+            <CardHeader className="pb-3">
+              <div className="flex items-center space-x-2">
+                <Leaf className="w-5 h-5 text-amber-600" />
+                <CardTitle className="text-lg text-amber-900">IKS Insight</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <span className="text-sm font-medium text-amber-800">Ayurvedic Dosha:</span>
+                <Badge className="ml-2 bg-amber-200 text-amber-900">{(aiAnalysis.classification as any).iks_mapping?.dosha}</Badge>
+              </div>
+              <p className="text-sm text-amber-800">{(aiAnalysis.classification as any).iks_mapping?.explanation}</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Your Pattern Section */}
+        {trendInsight && (
+          <Card className="mb-8 border-0 shadow-lg bg-gradient-to-br from-blue-50 to-cyan-50">
+            <CardHeader className="pb-3">
+              <div className="flex items-center space-x-2">
+                <TrendingUp className="w-5 h-5 text-blue-600" />
+                <CardTitle className="text-lg text-blue-900">Your Pattern</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-blue-800">{trendInsight.message}</p>
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <div className="bg-white/60 p-2 rounded">
+                  <span className="text-xs text-blue-600 font-medium">Most Frequent State:</span>
+                  <Badge className="ml-1 bg-blue-100 text-blue-900">{trendInsight.dominantState}</Badge>
+                </div>
+                <div className="bg-white/60 p-2 rounded">
+                  <span className="text-xs text-blue-600 font-medium">Associated Dosha:</span>
+                  <Badge className="ml-1 bg-blue-100 text-blue-900">{trendInsight.dominantDosha}</Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Alert Section */}
+        {recurringPattern && (
+          <Card className="mb-8 border-0 shadow-lg bg-gradient-to-br from-amber-50 to-red-50 border-l-4 border-orange-500">
+            <CardHeader className="pb-3">
+              <div className="flex items-center space-x-2">
+                <AlertCircle className="w-5 h-5 text-orange-600" />
+                <CardTitle className="text-lg text-orange-900">Pattern Alert</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-orange-800">
+                Recurring pattern detected. The same emotional state has appeared multiple times in your recent history. 
+                Consider lifestyle adjustments or exploring our long-term support options for deeper wellness support.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Dosha-Specific Recommendations */}
+        {aiAnalysis?.iks_recommendations && (
+          <Card className="mb-8 border-0 shadow-lg bg-gradient-to-br from-purple-50 to-indigo-50">
+            <CardHeader className="pb-3">
+              <div className="flex items-center space-x-2">
+                <Leaf className="w-5 h-5 text-purple-600" />
+                <CardTitle className="text-lg text-purple-900">
+                  {aiAnalysis.iks_recommendations.dosha} Balancing Practices
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2">
+                {aiAnalysis.iks_recommendations.recommendations.map((rec, idx) => (
+                  <li key={idx} className="flex items-start space-x-3">
+                    <span className="text-purple-600 font-bold mt-0.5">•</span>
+                    <span className="text-sm text-purple-800">{rec}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Recommendations */}
         <div className="grid gap-6">
           {recommendedRemedies.map((remedy, index) => (
@@ -391,9 +500,14 @@ export default function ShortTermPage() {
                 </Tabs>
 
                 <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-100">
-                  <Button variant="outline" size="sm">
-                    <Play className="w-4 h-4 mr-2" />
-                    Start Practice
+                  <Button 
+                    onClick={() => router.push(`/practice-guide?id=${remedy.id}`)}
+                    variant="outline" 
+                    size="sm"
+                    className="flex items-center space-x-2"
+                  >
+                    <Play className="w-4 h-4" />
+                    <span>Start Practice</span>
                   </Button>
 
                   {!completedRemedies.includes(remedy.id) ? (
