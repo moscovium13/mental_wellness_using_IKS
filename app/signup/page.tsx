@@ -1,11 +1,24 @@
 'use client'
-
+import { signup } from "@/lib/auth";
+import { useRouter } from "next/navigation";
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { User, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react'
 
 export default function SignupPage() {
+  const handleSignup = async () => {
+  try {
+    setIsLoading(true);
+    await signup(email, password);
+    alert("Signup successful");
+    router.push("/home");
+  } catch (err: any) {
+    alert(err.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
   const router = useRouter()
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
