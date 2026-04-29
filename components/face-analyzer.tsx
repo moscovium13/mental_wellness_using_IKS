@@ -47,18 +47,12 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         
-        // Wait for video to be ready before starting detection
+        // Wait a moment for video to start playing before beginning detection
         await new Promise<void>((resolve) => {
-          if (videoRef.current) {
-            const onCanPlay = () => {
-              videoRef.current?.removeEventListener('canplay', onCanPlay)
-              console.log('[v0] Video ready, starting emotion detection')
-              resolve()
-            }
-            videoRef.current.addEventListener('canplay', onCanPlay)
-          }
+          setTimeout(resolve, 1000)
         })
 
+        console.log('[v0] Starting emotion detection loop')
         setIsActive(true)
 
         // Start emotion detection loop
@@ -67,6 +61,7 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
             try {
               const emotion = await detectEmotion(videoRef.current)
               if (emotion) {
+                console.log('[v0] Emotion detected:', emotion.emotion, 'Confidence:', emotion.confidence)
                 setConfidence(emotion.confidence)
                 onEmotionDetected(emotion)
               }
