@@ -19,21 +19,36 @@ let modelsLoaded = false
 export async function loadModels(): Promise<void> {
   if (modelsLoaded) return
 
-  const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/'
+  // Try multiple CDN sources for reliability
+  const MODEL_URLS = [
+    'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/',
+    'https://unpkg.com/@vladmandic/face-api/model/',
+  ]
 
-  try {
-    await Promise.all([
-      faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-      faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-      faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-      faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
-    ])
-    modelsLoaded = true
-    console.log('[v0] Face API models loaded successfully')
-  } catch (error) {
-    console.error('[v0] Error loading models:', error)
-    throw new Error('Failed to load face detection models')
+  let lastError: Error | null = null
+
+  for (const MODEL_URL of MODEL_URLS) {
+    try {
+      console.log('[v0] Attempting to load models from:', MODEL_URL)
+      await Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+        faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+        faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+      ])
+      modelsLoaded = true
+      console.log('[v0] Face API models loaded successfully from', MODEL_URL)
+      return
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error))
+      console.warn('[v0] Failed to load models from', MODEL_URL, ':', lastError.message)
+      continue
+    }
   }
+
+  // If all CDNs fail, throw the last error
+  console.error('[v0] All model loading attempts failed')
+  throw lastError || new Error('Failed to load face detection models')
 }
 
 /**

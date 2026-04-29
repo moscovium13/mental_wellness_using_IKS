@@ -32,34 +32,67 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
     setError(null)
 
     try {
+      console.log('[v0] Starting analysis - loading models...')
       // Load face detection models
       await loadModels()
+      console.log('[v0] Models loaded, requesting camera access...')
 
       // Request camera access
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: 640, height: 480, facingMode: 'user' },
         audio: false,
       })
+      console.log('[v0] Camera access granted')
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream
+        
+        // Wait for video to be ready before starting detection
+        await new Promise<void>((resolve) => {
+          if (videoRef.current) {
+            const onCanPlay = () => {
+              videoRef.current?.removeEventListener('canplay', onCanPlay)
+              console.log('[v0] Video ready, starting emotion detection')
+              resolve()
+            }
+            videoRef.current.addEventListener('canplay', onCanPlay)
+          }
+        })
+
         setIsActive(true)
 
         // Start emotion detection loop
         detectionIntervalRef.current = setInterval(async () => {
           if (videoRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
-            const emotion = await detectEmotion(videoRef.current)
-            if (emotion) {
-              setConfidence(emotion.confidence)
-              onEmotionDetected(emotion)
+            try {
+              const emotion = await detectEmotion(videoRef.current)
+              if (emotion) {
+                setConfidence(emotion.confidence)
+                onEmotionDetected(emotion)
+              }
+            } catch (detectionError) {
+              console.warn('[v0] Detection frame failed (this is normal):', detectionError)
             }
           }
         }, 500) // Run detection every 500ms
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to access camera'
+      let errorMessage = 'Failed to start emotion analysis'
+      
+      if (err instanceof DOMException) {
+        if (err.name === 'NotAllowedError') {
+          errorMessage = 'Camera permission denied. Please allow camera access.'
+        } else if (err.name === 'NotFoundError') {
+          errorMessage = 'No camera found. Please connect a camera device.'
+        } else {
+          errorMessage = err.message
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message
+      }
+      
       setError(errorMessage)
-      console.error('[v0] Camera error:', err)
+      console.error('[v0] Analysis error:', err)
     } finally {
       setIsLoading(false)
     }
