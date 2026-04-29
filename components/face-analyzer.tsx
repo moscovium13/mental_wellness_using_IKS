@@ -50,13 +50,26 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
       })
       
       streamRef.current = stream
-      console.log('[v0] Camera access granted')
+      console.log('[v0] Camera access granted, stream:', stream)
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        console.log('[v0] Video source set')
+      // Ensure videoRef is available
+      if (!videoRef.current) {
+        console.error('[v0] Video ref is null - element not mounted')
+        throw new Error('Video element not available')
+      }
 
-        // Start detection immediately
+      // Set the stream to video element
+      videoRef.current.srcObject = stream
+      videoRef.current.onloadedmetadata = () => {
+        console.log('[v0] Video metadata loaded, playing...')
+        if (videoRef.current) {
+          videoRef.current.play().catch((err) => console.warn('[v0] Play failed:', err))
+        }
+      }
+      console.log('[v0] Video source set, waiting for video to play')
+
+      // Start detection after a brief delay to allow video to start
+      setTimeout(() => {
         console.log('[v0] Starting detection loop')
         const interval = setInterval(async () => {
           if (!videoRef.current) {
@@ -67,7 +80,7 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
           try {
             const emotion = await detectEmotion(videoRef.current)
             if (emotion) {
-              console.log('[v0] Detected:', emotion.emotion)
+              console.log('[v0] Detected:', emotion.emotion, emotion.confidence)
               setConfidence(emotion.confidence)
               onEmotionDetected(emotion)
             }
@@ -78,11 +91,6 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
         
         detectionIntervalRef.current = interval
         setIsActive(true)
-        console.log('[v0] Detection loop started and isActive set')
-      }
-
-      setIsLoading(false)
-      isStartingRef.current = false
     } catch (err) {
       isStartingRef.current = false
       setIsLoading(false)
