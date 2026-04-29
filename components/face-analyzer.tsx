@@ -12,17 +12,20 @@ interface FaceAnalyzerProps {
 
 export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }: FaceAnalyzerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isActive, setIsActive] = useState(false)
   const [confidence, setConfidence] = useState(0)
   const detectionIntervalRef = useRef<NodeJS.Timeout>()
+  const streamRef = useRef<MediaStream | null>(null)
 
   useEffect(() => {
     return () => {
       if (detectionIntervalRef.current) {
         clearInterval(detectionIntervalRef.current)
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop())
       }
     }
   }, [])
@@ -32,75 +35,72 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
     setError(null)
 
     try {
-      console.log('[v0] Starting analysis - loading models...')
-      // Load face detection models
+      console.log('[v0] Loading models...')
       await loadModels()
-      console.log('[v0] Models loaded, requesting camera access...')
+      console.log('[v0] Models loaded, requesting camera...')
 
-      // Request camera access
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 640, height: 480, facingMode: 'user' },
+        video: { facingMode: 'user' },
         audio: false,
       })
+      
+      streamRef.current = stream
       console.log('[v0] Camera access granted')
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream
-        
-        // Wait a moment for video to start playing before beginning detection
-        await new Promise<void>((resolve) => {
-          setTimeout(resolve, 1000)
-        })
-
-        console.log('[v0] Starting emotion detection loop')
         setIsActive(true)
 
-        // Start emotion detection loop
+        // Start detection immediately - don't wait
+        console.log('[v0] Starting detection')
         detectionIntervalRef.current = setInterval(async () => {
-          if (videoRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
-            try {
-              const emotion = await detectEmotion(videoRef.current)
-              if (emotion) {
-                console.log('[v0] Emotion detected:', emotion.emotion, 'Confidence:', emotion.confidence)
-                setConfidence(emotion.confidence)
-                onEmotionDetected(emotion)
-              }
-            } catch (detectionError) {
-              console.warn('[v0] Detection frame failed (this is normal):', detectionError)
+          if (!videoRef.current) return
+          
+          try {
+            const emotion = await detectEmotion(videoRef.current)
+            if (emotion) {
+              console.log('[v0] Detected:', emotion.emotion)
+              setConfidence(emotion.confidence)
+              onEmotionDetected(emotion)
             }
+          } catch (err) {
+            // Silent fail on individual frames
           }
-        }, 500) // Run detection every 500ms
+        }, 300)
       }
+
+      setIsLoading(false)
     } catch (err) {
-      let errorMessage = 'Failed to start emotion analysis'
+      setIsLoading(false)
       
       if (err instanceof DOMException) {
         if (err.name === 'NotAllowedError') {
-          errorMessage = 'Camera permission denied. Please allow camera access.'
+          setError('Camera permission denied. Please allow camera access in browser settings.')
         } else if (err.name === 'NotFoundError') {
-          errorMessage = 'No camera found. Please connect a camera device.'
+          setError('No camera found. Please connect a camera device.')
         } else {
-          errorMessage = err.message
+          setError(err.message)
         }
-      } else if (err instanceof Error) {
-        errorMessage = err.message
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to start analysis')
       }
-      
-      setError(errorMessage)
-      console.error('[v0] Analysis error:', err)
-    } finally {
-      setIsLoading(false)
+      console.error('[v0] Error:', err)
     }
   }
 
   const stopAnalysis = () => {
+    console.log('[v0] Stopping analysis')
+    
     if (detectionIntervalRef.current) {
       clearInterval(detectionIntervalRef.current)
     }
 
-    if (videoRef.current?.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream
-      stream.getTracks().forEach((track) => track.stop())
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop())
+      streamRef.current = null
+    }
+
+    if (videoRef.current) {
       videoRef.current.srcObject = null
     }
 
@@ -109,18 +109,18 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full space-y-4">
       {!isActive ? (
-        <div className="text-center">
+        <div className="space-y-4">
           <Button
             onClick={startAnalysis}
             disabled={isLoading}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center space-x-2 mx-auto"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center space-x-2"
           >
             {isLoading ? (
               <>
                 <Loader className="w-4 h-4 animate-spin" />
-                <span>Loading...</span>
+                <span>Starting...</span>
               </>
             ) : (
               <>
@@ -131,31 +131,25 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
           </Button>
 
           {error && (
-            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
               {error}
             </div>
           )}
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="relative bg-black rounded-lg overflow-hidden">
+          <div className="relative bg-black rounded-lg overflow-hidden border-2 border-emerald-600">
             <video
               ref={videoRef}
               autoPlay
               playsInline
               muted
-              className="w-full h-auto"
-              style={{ maxHeight: '400px' }}
-            />
-            <canvas
-              ref={canvasRef}
-              className="absolute top-0 left-0 w-full h-full"
-              style={{ display: 'none' }}
+              className="w-full aspect-video object-cover"
             />
 
             {confidence > 0 && (
               <div className="absolute bottom-4 right-4 bg-emerald-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                Confidence: {confidence}%
+                {confidence}%
               </div>
             )}
           </div>
@@ -166,11 +160,11 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
             className="w-full flex items-center justify-center space-x-2"
           >
             <X className="w-4 h-4" />
-            <span>Stop Analysis</span>
+            <span>Stop</span>
           </Button>
 
           <p className="text-xs text-slate-500 text-center">
-            Hold your face within the camera frame for best results. Your video is not stored.
+            Position your face in frame. Detection runs continuously. Video is never stored.
           </p>
         </div>
       )}

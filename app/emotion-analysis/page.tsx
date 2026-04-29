@@ -12,8 +12,9 @@ import {
   getEmotionRecommendations,
 } from '@/lib/face-emotion-service'
 import { saveMoodEntry } from '@/lib/mood-history'
-import { ArrowLeft, Heart, Lightbulb, Save } from 'lucide-react'
+import { ArrowLeft, Heart, Lightbulb, Save, MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import TherapistLocator from '@/components/therapist-locator'
 
 const emotionEmojis: Record<string, string> = {
   happy: '😊',
@@ -190,6 +191,19 @@ export default function EmotionAnalysisPage() {
                 <span>{isSaving ? 'Saving...' : 'Save to Mood History'}</span>
               </Button>
             </div>
+
+            {/* Therapist Recommendations */}
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-cyan-50 mt-8">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <MapPin className="w-5 h-5 text-blue-600" />
+                  <span>Professional Support Nearby</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <TherapistLocator />
+              </CardContent>
+            </Card>
           </div>
         ) : null}
       </div>
