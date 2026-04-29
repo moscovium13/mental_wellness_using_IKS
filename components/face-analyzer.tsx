@@ -16,8 +16,9 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
   const [error, setError] = useState<string | null>(null)
   const [isActive, setIsActive] = useState(false)
   const [confidence, setConfidence] = useState(0)
-  const detectionIntervalRef = useRef<NodeJS.Timeout>()
+  const detectionIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
+  const isStartingRef = useRef(false)
 
   useEffect(() => {
     return () => {
@@ -31,6 +32,10 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
   }, [])
 
   const startAnalysis = async () => {
+    // Prevent multiple simultaneous starts
+    if (isStartingRef.current || isActive) return
+    isStartingRef.current = true
+    
     setIsLoading(true)
     setError(null)
 
@@ -49,12 +54,15 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream
-        setIsActive(true)
+        console.log('[v0] Video source set')
 
-        // Start detection immediately - don't wait
-        console.log('[v0] Starting detection')
-        detectionIntervalRef.current = setInterval(async () => {
-          if (!videoRef.current) return
+        // Start detection immediately
+        console.log('[v0] Starting detection loop')
+        const interval = setInterval(async () => {
+          if (!videoRef.current) {
+            clearInterval(interval)
+            return
+          }
           
           try {
             const emotion = await detectEmotion(videoRef.current)
@@ -67,10 +75,16 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
             // Silent fail on individual frames
           }
         }, 300)
+        
+        detectionIntervalRef.current = interval
+        setIsActive(true)
+        console.log('[v0] Detection loop started and isActive set')
       }
 
       setIsLoading(false)
+      isStartingRef.current = false
     } catch (err) {
+      isStartingRef.current = false
       setIsLoading(false)
       
       if (err instanceof DOMException) {
