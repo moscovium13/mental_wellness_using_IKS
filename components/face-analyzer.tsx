@@ -91,6 +91,10 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
         
         detectionIntervalRef.current = interval
         setIsActive(true)
+        setIsLoading(false)
+        isStartingRef.current = false
+        console.log('[v0] Detection loop started')
+      }, 1000)
     } catch (err) {
       isStartingRef.current = false
       setIsLoading(false)
