@@ -55,11 +55,20 @@ export async function loadModels(): Promise<void> {
  * Detect emotion from video element
  */
 export async function detectEmotion(videoElement: HTMLVideoElement): Promise<DetectedEmotion | null> {
+  // Always ensure models are loaded before detection
   if (!modelsLoaded) {
+    console.log('[v0] Models not loaded, loading now...')
     await loadModels()
+    // Add extra delay to ensure models are fully initialized
+    await new Promise((resolve) => setTimeout(resolve, 500))
   }
 
   try {
+    // Check if video has actual data before detecting
+    if (videoElement.readyState !== videoElement.HAVE_ENOUGH_DATA) {
+      return null
+    }
+
     const detections = await faceapi
       .detectSingleFace(videoElement, new faceapi.TinyFaceDetectorOptions())
       .withFaceLandmarks()
@@ -82,7 +91,10 @@ export async function detectEmotion(videoElement: HTMLVideoElement): Promise<Det
       allExpressions: expressions,
     }
   } catch (error) {
-    console.error('[v0] Error detecting emotion:', error)
+    // Only log errors that aren't frame-skipping errors
+    if (error instanceof Error && !error.message.includes('load model before inference')) {
+      console.error('[v0] Error detecting emotion:', error.message)
+    }
     return null
   }
 }

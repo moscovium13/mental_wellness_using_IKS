@@ -68,7 +68,7 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
       }
       console.log('[v0] Video source set, waiting for video to play')
 
-      // Start detection after a brief delay to allow video to start
+      // Start detection after delay to ensure video is playing and models are ready
       setTimeout(() => {
         console.log('[v0] Starting detection loop')
         const interval = setInterval(async () => {
@@ -80,21 +80,20 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
           try {
             const emotion = await detectEmotion(videoRef.current)
             if (emotion) {
-              console.log('[v0] Detected:', emotion.emotion, emotion.confidence)
               setConfidence(emotion.confidence)
               onEmotionDetected(emotion)
             }
           } catch (err) {
             // Silent fail on individual frames
           }
-        }, 300)
+        }, 500)
         
         detectionIntervalRef.current = interval
         setIsActive(true)
         setIsLoading(false)
         isStartingRef.current = false
         console.log('[v0] Detection loop started')
-      }, 1000)
+      }, 2500)
     } catch (err) {
       isStartingRef.current = false
       setIsLoading(false)
