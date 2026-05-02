@@ -136,6 +136,26 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
 
   return (
     <div className="w-full space-y-4">
+      {/* Video element - always rendered but hidden when not active */}
+      <div className={isActive ? "block" : "hidden"}>
+        <div className="relative bg-black rounded-lg overflow-hidden border-2 border-emerald-600">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-full aspect-video object-cover"
+          />
+
+          {confidence > 0 && (
+            <div className="absolute bottom-4 right-4 bg-emerald-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+              {confidence}%
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Start button - shown when not active */}
       {!isActive ? (
         <div className="space-y-4">
           <Button
@@ -164,22 +184,6 @@ export default function FaceAnalyzer({ onEmotionDetected, isAnalyzing = false }:
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="relative bg-black rounded-lg overflow-hidden border-2 border-emerald-600">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="w-full aspect-video object-cover"
-            />
-
-            {confidence > 0 && (
-              <div className="absolute bottom-4 right-4 bg-emerald-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                {confidence}%
-              </div>
-            )}
-          </div>
-
           <Button
             onClick={stopAnalysis}
             variant="outline"
