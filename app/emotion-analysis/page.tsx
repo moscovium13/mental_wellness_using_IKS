@@ -12,9 +12,11 @@ import {
   getEmotionRecommendations,
 } from '@/lib/face-emotion-service'
 import { saveMoodEntry } from '@/lib/mood-history'
-import { ArrowLeft, Heart, Lightbulb, Save, MapPin } from 'lucide-react'
+import { ArrowLeft, Heart, Lightbulb, Save, MapPin, Zap, Brain } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import TherapistLocator from '@/components/therapist-locator'
+import PremiumHeader from '@/components/premium-header'
+import { PremiumCard } from '@/components/premium-cards'
 
 const emotionEmojis: Record<string, string> = {
   happy: '😊',
@@ -26,14 +28,14 @@ const emotionEmojis: Record<string, string> = {
   disgusted: '🤢',
 }
 
-const emotionColors: Record<string, string> = {
-  happy: 'bg-yellow-100 text-yellow-900',
-  sad: 'bg-blue-100 text-blue-900',
-  angry: 'bg-red-100 text-red-900',
-  neutral: 'bg-slate-100 text-slate-900',
-  fearful: 'bg-purple-100 text-purple-900',
-  surprised: 'bg-orange-100 text-orange-900',
-  disgusted: 'bg-green-100 text-green-900',
+const emotionAccents: Record<string, 'primary' | 'secondary' | 'accent' | 'success' | 'calm' | 'energy'> = {
+  happy: 'energy',
+  sad: 'calm',
+  angry: 'accent',
+  neutral: 'primary',
+  fearful: 'secondary',
+  surprised: 'energy',
+  disgusted: 'primary',
 }
 
 export default function EmotionAnalysisPage() {
@@ -75,81 +77,94 @@ export default function EmotionAnalysisPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white py-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <Button onClick={() => router.back()} variant="outline" className="mb-6 flex items-center space-x-2">
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back</span>
-        </Button>
-
-        {/* Title */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-3">Emotion Analysis</h1>
-          <p className="text-slate-600 text-lg">
-            Detect your current emotional state through facial expression analysis. Your video is never stored.
-          </p>
+    <div className="min-h-screen bg-background">
+      <PremiumHeader />
+      
+      <div className="max-w-6xl mx-auto py-12 px-4 space-y-8">
+        {/* Header Section */}
+        <div className="space-y-4">
+          <Button
+            onClick={() => router.back()}
+            variant="outline"
+            className="rounded-lg border-border/50"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+          
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                <Brain className="w-6 h-6 text-primary" />
+              </div>
+              <h1 className="text-5xl font-bold">Real-Time Emotion Analysis</h1>
+            </div>
+            <p className="text-xl text-foreground/70">
+              Discover your emotions through advanced AI facial analysis. Your emotions guide your wellness journey.
+            </p>
+          </div>
         </div>
 
-        {/* Main Content */}
-        {!showResults ? (
-          <Card className="border-0 shadow-lg bg-white/90">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Heart className="w-5 h-5 text-emerald-600" />
-                <span>Real-Time Emotion Detection</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-                <p className="text-sm text-emerald-800">
-                  ✓ <strong>Privacy First:</strong> All processing happens on your device
-                  <br />✓ <strong>No Storage:</strong> Video is never saved
-                  <br />✓ <strong>Your Choice:</strong> You decide what to save
-                </p>
-              </div>
-
-              <FaceAnalyzer onEmotionDetected={handleEmotionDetected} />
-            </CardContent>
-          </Card>
+        {/* Face Analyzer Section */}
+        <Card className="card-premium border-border/40 overflow-hidden shadow-2xl">
+          <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10 border-b border-border/30">
+            <CardTitle className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-primary" />
+              Live Emotion Detection
+            </CardTitle>
+            <p className="text-sm text-foreground/60 mt-2">Position your face in the frame and allow the AI to analyze your emotional state</p>
+          </CardHeader>
+          <CardContent className="p-8">
+            <FaceAnalyzer onEmotionDetected={handleEmotionDetected} />
+          </CardContent>
+        </Card>
         ) : detectedEmotion ? (
-          <div className="space-y-6">
-            {/* Emotion Result Card */}
-            <Card className="border-0 shadow-lg bg-white/90">
-              <CardHeader>
-                <CardTitle>Detected Emotion</CardTitle>
+          <div className="space-y-8 animate-fadeInUp">
+            {/* Primary Emotion Display */}
+            <Card className="card-premium border-border/40 overflow-hidden shadow-2xl">
+              <CardHeader className={`bg-gradient-to-r from-primary/10 to-accent/10 border-b border-border/30 pb-8`}>
+                <div className="text-center space-y-4">
+                  <div className="text-9xl">{emotionEmojis[detectedEmotion.emotion]}</div>
+                  <div className="space-y-2">
+                    <h2 className="text-4xl font-bold text-gradient capitalize">{detectedEmotion.emotion}</h2>
+                    <p className="text-lg text-foreground/70">{getEmotionDescription(detectedEmotion.emotion)}</p>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  <div className="text-6xl">{emotionEmojis[detectedEmotion.emotion]}</div>
-                  <div>
-                    <Badge className={`text-lg px-4 py-2 ${emotionColors[detectedEmotion.emotion]}`}>
-                      {detectedEmotion.emotion.toUpperCase()}
-                    </Badge>
-                    <p className="text-slate-600 mt-2">{getEmotionDescription(detectedEmotion.emotion)}</p>
-                    <p className="text-sm text-slate-500 mt-1">Confidence: {detectedEmotion.confidence}%</p>
+              <CardContent className="p-8 space-y-8">
+                {/* Confidence Meter */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <p className="font-semibold text-foreground">Confidence Score</p>
+                    <span className="text-2xl font-bold text-primary">{detectedEmotion.confidence}%</span>
+                  </div>
+                  <div className="w-full h-3 bg-border rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500"
+                      style={{ width: `${detectedEmotion.confidence}%` }}
+                    />
                   </div>
                 </div>
 
                 {/* Expression Breakdown */}
-                <div className="mt-6 p-4 bg-slate-50 rounded-lg">
-                  <h4 className="font-semibold text-slate-800 mb-3">Expression Breakdown</h4>
-                  <div className="space-y-2">
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-lg text-foreground">Expression Analysis</h4>
+                  <div className="space-y-3">
                     {Object.entries(detectedEmotion.allExpressions)
                       .sort(([, a], [, b]) => b - a)
                       .slice(0, 5)
                       .map(([expression, score]) => (
-                        <div key={expression} className="flex items-center justify-between">
-                          <span className="text-sm text-slate-600 capitalize">{expression}</span>
-                          <div className="w-32 bg-slate-200 rounded-full h-2">
+                        <div key={expression} className="space-y-1.5">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-foreground capitalize">{expression}</span>
+                            <span className="text-sm font-semibold text-primary">{Math.round(score * 100)}%</span>
+                          </div>
+                          <div className="w-full h-2 bg-border rounded-full overflow-hidden">
                             <div
-                              className="bg-emerald-600 h-2 rounded-full"
+                              className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
                               style={{ width: `${score * 100}%` }}
                             />
                           </div>
-                          <span className="text-sm font-medium text-slate-700 w-12 text-right">
-                            {Math.round(score * 100)}%
-                          </span>
                         </div>
                       ))}
                   </div>
@@ -157,38 +172,39 @@ export default function EmotionAnalysisPage() {
               </CardContent>
             </Card>
 
-            {/* Recommendations Card */}
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-50 to-teal-50">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Lightbulb className="w-5 h-5 text-emerald-600" />
-                  <span>Wellness Recommendations</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {getEmotionRecommendations(detectedEmotion.emotion).map((rec, idx) => (
-                    <li key={idx} className="flex items-start space-x-3">
-                      <span className="text-emerald-600 font-bold mt-0.5">•</span>
-                      <span className="text-slate-700">{rec}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+            {/* Wellness Recommendations */}
+            <PremiumCard
+              title="Personalized Wellness Recommendations"
+              description="Tailored suggestions based on your detected emotional state"
+              accent="energy"
+              icon={Lightbulb}
+            >
+              <div className="space-y-4">
+                {getEmotionRecommendations(detectedEmotion.emotion).map((rec, idx) => (
+                  <div key={idx} className="flex gap-4 p-4 rounded-lg bg-primary/5 border border-primary/20 hover:border-primary/40 transition-colors">
+                    <div className="text-2xl flex-shrink-0">✨</div>
+                    <p className="text-foreground/80 pt-1">{rec}</p>
+                  </div>
+                ))}
+              </div>
+            </PremiumCard>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button onClick={handleDismiss} variant="outline" className="flex-1">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button
+                onClick={handleDismiss}
+                variant="outline"
+                className="flex-1 h-12 rounded-lg border-border/50"
+              >
                 Analyze Again
               </Button>
               <Button
                 onClick={handleSaveEmotion}
                 disabled={isSaving}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center space-x-2"
+                className="flex-1 btn-primary h-12 rounded-lg font-semibold"
               >
-                <Save className="w-4 h-4" />
-                <span>{isSaving ? 'Saving...' : 'Save to Mood History'}</span>
+                <Save className="w-4 h-4 mr-2" />
+                <span>{isSaving ? 'Saving...' : 'Save to History'}</span>
               </Button>
             </div>
 
