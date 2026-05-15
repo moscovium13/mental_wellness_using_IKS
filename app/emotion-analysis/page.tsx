@@ -118,7 +118,9 @@ export default function EmotionAnalysisPage() {
             <FaceAnalyzer onEmotionDetected={handleEmotionDetected} />
           </CardContent>
         </Card>
-        ) : detectedEmotion ? (
+
+        {/* Results Section */}
+        {detectedEmotion ? (
           <div className="space-y-8 animate-fadeInUp">
             {/* Primary Emotion Display */}
             <Card className="card-premium border-border/40 overflow-hidden shadow-2xl">
