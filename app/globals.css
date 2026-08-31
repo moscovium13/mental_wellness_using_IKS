@@ -4,74 +4,104 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  /* Premium wellness color palette - Level 100 */
+  --background: oklch(0.98 0 0); /* Off-white for sophistication */
+  --foreground: oklch(0.15 0.01 264); /* Deep charcoal */
+  --card: oklch(1 0 0); /* Pure white */
+  --card-foreground: oklch(0.15 0.01 264);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.4 0.177 164.1); /* Updated to emerald-600 for healing theme */
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.7 0.15 85); /* Added warm saffron accent color */
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --popover-foreground: oklch(0.15 0.01 264);
+  
+  /* Primary: Teal-green for wellness and trust */
+  --primary: oklch(0.45 0.18 164); /* Rich emerald-teal */
+  --primary-foreground: oklch(1 0 0);
+  
+  /* Secondary: Soft purple for balance */
+  --secondary: oklch(0.7 0.12 290); /* Soft lavender */
+  --secondary-foreground: oklch(1 0 0);
+  
+  --muted: oklch(0.95 0 0);
+  --muted-foreground: oklch(0.5 0 0);
+  
+  /* Accent: Warm golden for positivity */
+  --accent: oklch(0.72 0.15 70); /* Warm gold */
+  --accent-foreground: oklch(0.15 0.01 264);
+  
+  --destructive: oklch(0.6 0.2 25); /* Softer red */
+  --destructive-foreground: oklch(1 0 0);
+  
+  --border: oklch(0.93 0 0); /* Subtle borders */
+  --input: oklch(0.98 0 0);
+  --ring: oklch(0.5 0.15 164); /* Teal ring */
+  
+  /* Wellness accent colors */
+  --wellness-success: oklch(0.5 0.18 140); /* Teal */
+  --wellness-calm: oklch(0.65 0.15 280); /* Soft purple */
+  --wellness-energy: oklch(0.72 0.15 70); /* Golden */
+  --wellness-rest: oklch(0.8 0.1 264); /* Soft blue */
+  
+  --chart-1: oklch(0.45 0.18 164);
+  --chart-2: oklch(0.65 0.15 280);
+  --chart-3: oklch(0.72 0.15 70);
+  --chart-4: oklch(0.55 0.16 200);
+  --chart-5: oklch(0.6 0.15 20);
+  
+  --radius: 1rem; /* Larger border radius for premium feel */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  
+  --sidebar: oklch(0.98 0 0);
+  --sidebar-foreground: oklch(0.15 0.01 264);
+  --sidebar-primary: oklch(0.45 0.18 164);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.72 0.15 70);
+  --sidebar-accent-foreground: oklch(0.15 0.01 264);
+  --sidebar-border: oklch(0.93 0 0);
+  --sidebar-ring: oklch(0.5 0.15 164);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.5 0.177 164.1); /* Adjusted emerald for dark mode */
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.75 0.15 85); /* Adjusted saffron for dark mode */
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  --background: oklch(0.12 0 0); /* Deep charcoal */
+  --foreground: oklch(0.95 0 0); /* Almost white */
+  --card: oklch(0.18 0 0); /* Slightly lighter dark */
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.18 0 0);
+  --popover-foreground: oklch(0.95 0 0);
+  
+  --primary: oklch(0.55 0.18 164); /* Brighter teal for dark mode */
+  --primary-foreground: oklch(0.15 0.01 264);
+  
+  --secondary: oklch(0.75 0.12 290); /* Lighter lavender */
+  --secondary-foreground: oklch(0.15 0.01 264);
+  
+  --muted: oklch(0.35 0 0);
+  --muted-foreground: oklch(0.7 0 0);
+  
+  --accent: oklch(0.76 0.15 70); /* Brighter gold */
+  --accent-foreground: oklch(0.15 0.01 264);
+  
+  --destructive: oklch(0.55 0.2 25);
+  --destructive-foreground: oklch(0.95 0 0);
+  
+  --border: oklch(0.28 0 0);
+  --input: oklch(0.22 0 0);
+  --ring: oklch(0.55 0.15 164);
+  
+  --wellness-success: oklch(0.55 0.18 140);
+  --wellness-calm: oklch(0.75 0.15 280);
+  --wellness-energy: oklch(0.76 0.15 70);
+  --wellness-rest: oklch(0.6 0.1 264);
+  
+  --sidebar: oklch(0.15 0 0);
+  --sidebar-foreground: oklch(0.95 0 0);
+  --sidebar-primary: oklch(0.55 0.18 164);
+  --sidebar-primary-foreground: oklch(0.95 0 0);
+  --sidebar-accent: oklch(0.76 0.15 70);
+  --sidebar-accent-foreground: oklch(0.15 0.01 264);
+  --sidebar-border: oklch(0.28 0 0);
+  --sidebar-ring: oklch(0.55 0.15 164);
 }
 
 @theme inline {
@@ -119,12 +149,116 @@
   * {
     @apply border-border outline-ring/50;
   }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
   body {
     @apply bg-background text-foreground;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  h1 {
+    @apply text-4xl md:text-5xl font-bold tracking-tight text-balance;
+  }
+  
+  h2 {
+    @apply text-3xl md:text-4xl font-bold tracking-tight text-balance;
+  }
+  
+  h3 {
+    @apply text-2xl md:text-3xl font-bold tracking-tight;
+  }
+  
+  h4 {
+    @apply text-xl md:text-2xl font-semibold;
+  }
+  
+  p {
+    @apply text-base leading-relaxed;
   }
 }
 
-/* Added custom animation duration for breathing effect */
+@layer components {
+  .card-premium {
+    @apply rounded-2xl border border-border/40 bg-card shadow-lg hover:shadow-xl transition-shadow duration-300;
+  }
+  
+  .btn-primary {
+    @apply bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-medium transition-all duration-200 hover:scale-105;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg font-medium transition-all duration-200;
+  }
+  
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+  
+  .glass-effect {
+    @apply backdrop-blur-md bg-white/10 border border-white/20 rounded-2xl;
+  }
+}
+
+/* Premium animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 var(--primary);
+  }
+  50% {
+    box-shadow: 0 0 20px 10px rgba(59, 130, 246, 0.1);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.6s ease-out forwards;
+}
+
+.animate-glow {
+  animation: glow 3s ease-in-out infinite;
+}
+
+/* Custom animation duration for breathing effect */
 .duration-4000 {
   transition-duration: 4000ms;
+}
+
+/* Premium button group */
+.btn-group {
+  @apply flex gap-3 flex-wrap;
+}
+
+/* Smooth transitions */
+.transition-smooth {
+  @apply transition-all duration-300 ease-out;
 }

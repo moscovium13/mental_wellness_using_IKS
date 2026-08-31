@@ -26,6 +26,8 @@ import {
   ExternalLink,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import TherapistLocator from "@/components/therapist-locator"
+import { MapPin } from "lucide-react"
 
 interface AssessmentQuestion {
   id: string
@@ -456,6 +458,19 @@ export default function LongTermPage() {
                   </Badge>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Location-Based Therapist Recommendations */}
+          <Card className="mb-8 border-0 shadow-lg bg-gradient-to-br from-blue-50 to-cyan-50">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <MapPin className="w-5 h-5 text-blue-600" />
+                <span>Licensed Therapists Near You</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TherapistLocator />
             </CardContent>
           </Card>
 

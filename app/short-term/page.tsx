@@ -269,20 +269,29 @@ export default function ShortTermPage() {
               {validationError && <p className="text-sm text-red-600 mt-2">{validationError}</p>}
             </div>
 
-            <div className="flex justify-between items-center pt-4">
+            <div className="grid grid-cols-3 gap-3 pt-4">
               <Button
                 onClick={() => router.push("/classify")}
                 variant="outline"
-                className="flex items-center space-x-2"
+                className="flex items-center justify-center space-x-2"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Back</span>
               </Button>
 
               <Button
+                onClick={() => router.push("/emotion-analysis")}
+                variant="outline"
+                className="flex items-center justify-center space-x-2"
+              >
+                <Heart className="w-4 h-4" />
+                <span className="hidden sm:inline">Emotion AI</span>
+              </Button>
+
+              <Button
                 onClick={analyzeInput}
                 disabled={!userInput.trim() || isAnalyzing}
-                className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-700 min-w-32"
+                className="flex items-center justify-center space-x-2 bg-emerald-600 hover:bg-emerald-700"
               >
                 {isAnalyzing ? (
                   <>
